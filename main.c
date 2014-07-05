@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void
+static void
 usage ()
 {
 	fprintf(stderr, "Usage: ctfstats file\n");
