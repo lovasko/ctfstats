@@ -110,10 +110,10 @@ static int
 print_kind_counts (struct ctf_file* file)
 {
 	struct ctf_type* type = NULL;
-	unsigned int counts[CTF_KIND_MAX];
+	unsigned int counts[CTF_KIND_MAX+1];
 	int retval;
 
-	for (unsigned int i = 0; i < CTF_KIND_MAX; i++)
+	for (unsigned int i = 0; i < CTF_KIND_MAX+1; i++)
 		counts[i] = 0;
 
 	while ((retval = ctf_file_get_next_type(file, type, &type)) == CTF_OK)
@@ -125,7 +125,6 @@ print_kind_counts (struct ctf_file* file)
 			counts[kind]++;
 		else
 			return CTF_E_KIND_INVALID;
-			
 
 		if (kind == CTF_KIND_FWD_DECL)
 		{
