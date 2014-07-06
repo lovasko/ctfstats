@@ -158,6 +158,56 @@ print_kind_counts (struct ctf_file* file)
 	return CTF_OK;
 }
 
+static int
+print_struct_stats (struct ctf_file* file)
+{
+	struct ctf_type* type = NULL;
+	int retval;
+
+	unsigned int total_member_count = 0;
+	unsigned int total_struct_count = 0;
+	unsigned int* member_counts = NULL;
+
+	while ((retval = ctf_file_get_next_type(file, type, &type)) == CTF_OK)
+	{
+		uint8_t kind;
+		(void) ctf_type_get_kind(type, &kind);
+
+		if (kind == CTF_KIND_STRUCT)
+		{
+			total_struct_count++;
+			member_counts = realloc(member_counts, total_struct_count *
+			    sizeof(unsigned int));
+
+			void* data;
+			(void) ctf_type_get_data(type, &data);
+
+			struct ctf_struct_union* struct_union = data;
+			struct ctf_member* member = NULL;
+			unsigned int member_count = 0;		
+			while ((retval = ctf_struct_union_get_next_member(struct_union, member, 
+			    &member)) == CTF_OK)
+				member_count++;
+
+			member_counts[total_struct_count-1] = member_count;
+			total_member_count += member_count;
+		}
+	}
+
+	printf("-- Struct Stats -----\n");
+	printf("Number of members: %d\n", total_member_count);
+	printf("Minimal member count: %d\n", 
+	    minimum(member_counts, total_struct_count));
+	printf("Maximal member count: %d\n", 
+	    maximum(member_counts, total_struct_count));
+	printf("Average member count: %f\n",
+	    arithmetic_mean(member_counts, total_struct_count));
+	printf("Median member count: %f\n",
+	    median(member_counts, total_struct_count));
+
+	return CTF_OK;
+}
+
 int
 main (int argc, char* argv[])
 {
@@ -179,7 +229,7 @@ main (int argc, char* argv[])
 	print_global_counts(file);
 	/* print_function_stats(); */
 	print_kind_counts(file);
-	/* print_struct_stats(); */
+	print_struct_stats(file);
 	/* print_union_stats(); */
 	/* print_enum_stats(); */
 }
