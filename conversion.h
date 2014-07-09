@@ -8,7 +8,7 @@
 #include <string.h>
 
 const char*
-kind_to_string (uint8_t kind);
+kind_to_string (ctf_kind kind);
 
 #endif
 
