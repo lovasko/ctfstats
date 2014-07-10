@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-int 
-minimum (int values[], unsigned int size)
+unsigned int 
+minimum (unsigned int values[], unsigned int size)
 {
 	int m = values[0];
 
@@ -15,8 +15,8 @@ minimum (int values[], unsigned int size)
 	return m;
 }
 
-int
-maximum (int values[], unsigned int size)
+unsigned int
+maximum (unsigned int values[], unsigned int size)
 {
 	int m = values[0];
 
@@ -34,7 +34,7 @@ compare (const void* a, const void* b)
 }
 
 float
-median (int values[], unsigned int size)
+median (unsigned int values[], unsigned int size)
 {
 	int* values_sorted;
 	values_sorted = malloc(sizeof(int) * size);
@@ -49,7 +49,7 @@ median (int values[], unsigned int size)
 }
 
 float
-arithmetic_mean (int values[], unsigned int size)
+arithmetic_mean (unsigned int values[], unsigned int size)
 {
 	int sum = 0;
 
