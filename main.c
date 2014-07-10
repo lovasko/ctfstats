@@ -1,4 +1,4 @@
-#include "../libctf/src/libctf.h"
+#include "../lctf/src/libctf.h"
 
 #include "statistics.h"
 #include "conversion.h"
@@ -13,10 +13,10 @@ usage ()
 }
 
 static int 
-print_label_count (struct ctf_file* file)
+print_label_count (ctf_file file)
 {
 	unsigned int label_count = 0;
-	struct ctf_label* label = NULL;
+	ctf_label label = NULL;
 	int retval; 
 
 	while ((retval = ctf_file_get_next_label(file, label, &label)) == CTF_OK)
@@ -33,10 +33,10 @@ print_label_count (struct ctf_file* file)
 }
 
 static int 
-print_type_count (struct ctf_file* file)
+print_type_count (ctf_file file)
 {
 	unsigned int type_count = 0;
-	struct ctf_type* type = NULL;
+	ctf_type type = NULL;
 	int retval; 
 
 	while ((retval = ctf_file_get_next_type(file, type, &type)) == CTF_OK)
@@ -53,10 +53,10 @@ print_type_count (struct ctf_file* file)
 }
 
 static int
-print_data_object_count (struct ctf_file* file)
+print_data_object_count (ctf_file file)
 {
 	unsigned int data_object_count = 0;
-	struct ctf_data_object* data_object = NULL;
+	ctf_data_object data_object = NULL;
 	int retval; 
 
 	while ((retval = ctf_file_get_next_data_object(file, data_object,
@@ -75,10 +75,10 @@ print_data_object_count (struct ctf_file* file)
 }
 
 static int
-print_function_count (struct ctf_file* file)
+print_function_count (ctf_file file)
 {
 	unsigned int function_count = 0;
-	struct ctf_function* function = NULL;
+	ctf_function function = NULL;
 	int retval; 
 
 	while ((retval = ctf_file_get_next_function(file, function, &function)) 
@@ -97,7 +97,7 @@ print_function_count (struct ctf_file* file)
 }
 
 static void
-print_global_counts (struct ctf_file* file)
+print_global_counts (ctf_file file)
 {
 	printf("-- Global Counts -----\n");
 	print_label_count(file);
@@ -107,9 +107,9 @@ print_global_counts (struct ctf_file* file)
 }
 
 static int
-print_kind_counts (struct ctf_file* file)
+print_kind_counts (ctf_file file)
 {
-	struct ctf_type* type = NULL;
+	ctf_type type = NULL;
 	unsigned int counts[CTF_KIND_MAX+1];
 	int retval;
 
@@ -118,31 +118,13 @@ print_kind_counts (struct ctf_file* file)
 
 	while ((retval = ctf_file_get_next_type(file, type, &type)) == CTF_OK)
 	{
-		uint8_t kind;
-		(void) ctf_type_get_kind(type, &kind);
+		ctf_kind kind;
+		ctf_type_get_kind(type, &kind);
 
-		if (kind >= 0 && kind <= CTF_KIND_MAX)
+		if (kind >= CTF_KIND_MIN && kind <= CTF_KIND_MAX)
 			counts[kind]++;
 		else
 			return CTF_E_KIND_INVALID;
-
-		if (kind == CTF_KIND_FWD_DECL)
-		{
-			void* data;
-			(void) ctf_type_get_data(type, &data);
-
-			struct ctf_fwd_decl* fwd_decl = data;
-
-			uint8_t fwd_kind;
-			(void) ctf_fwd_decl_get_kind(fwd_decl, &fwd_kind);
-
-			if (fwd_kind == 0)
-				counts[CTF_KIND_STRUCT]++;
-			else if (fwd_kind > 0 && fwd_kind < CTF_KIND_MAX)
-				counts[fwd_kind]++;
-			else
-				return CTF_E_KIND_INVALID;
-		}
 	}
 
 	if (retval != CTF_END && retval != CTF_EMPTY)
@@ -159,9 +141,9 @@ print_kind_counts (struct ctf_file* file)
 }
 
 static int
-print_struct_stats (struct ctf_file* file)
+print_struct_stats (ctf_file file)
 {
-	struct ctf_type* type = NULL;
+	ctf_type type = NULL;
 	int retval;
 
 	unsigned int total_member_count = 0;
@@ -170,8 +152,8 @@ print_struct_stats (struct ctf_file* file)
 
 	while ((retval = ctf_file_get_next_type(file, type, &type)) == CTF_OK)
 	{
-		uint8_t kind;
-		(void) ctf_type_get_kind(type, &kind);
+		ctf_kind kind;
+		ctf_type_get_kind(type, &kind);
 
 		if (kind == CTF_KIND_STRUCT)
 		{
@@ -179,11 +161,10 @@ print_struct_stats (struct ctf_file* file)
 			member_counts = realloc(member_counts, total_struct_count *
 			    sizeof(unsigned int));
 
-			void* data;
-			(void) ctf_type_get_data(type, &data);
+			ctf_struct_union struct_union;
+			ctf_struct_union_init(type, &struct_union);
 
-			struct ctf_struct_union* struct_union = data;
-			struct ctf_member* member = NULL;
+			ctf_member member = NULL;
 			unsigned int member_count = 0;		
 			while ((retval = ctf_struct_union_get_next_member(struct_union, member, 
 			    &member)) == CTF_OK)
@@ -209,9 +190,9 @@ print_struct_stats (struct ctf_file* file)
 }
 
 static int
-print_union_stats (struct ctf_file* file)
+print_union_stats (ctf_file file)
 {
-	struct ctf_type* type = NULL;
+	ctf_type type = NULL;
 	int retval;
 
 	unsigned int total_member_count = 0;
@@ -220,8 +201,8 @@ print_union_stats (struct ctf_file* file)
 
 	while ((retval = ctf_file_get_next_type(file, type, &type)) == CTF_OK)
 	{
-		uint8_t kind;
-		(void) ctf_type_get_kind(type, &kind);
+		ctf_kind kind;
+		ctf_type_get_kind(type, &kind);
 
 		if (kind == CTF_KIND_UNION)
 		{
@@ -229,11 +210,10 @@ print_union_stats (struct ctf_file* file)
 			member_counts = realloc(member_counts, total_union_count *
 			    sizeof(unsigned int));
 
-			void* data;
-			(void) ctf_type_get_data(type, &data);
+			ctf_struct_union struct_union;
+			ctf_struct_union_init(type, &struct_union);
 
-			struct ctf_struct_union* struct_union = data;
-			struct ctf_member* member = NULL;
+			ctf_member member = NULL;
 			unsigned int member_count = 0;		
 			while ((retval = ctf_struct_union_get_next_member(struct_union, member, 
 			    &member)) == CTF_OK)
@@ -258,6 +238,55 @@ print_union_stats (struct ctf_file* file)
 	return CTF_OK;
 }
 
+static int
+print_enum_stats (ctf_file file)
+{
+	ctf_type type = NULL;
+	int retval;
+
+	unsigned int total_entry_count = 0;
+	unsigned int total_enum_count = 0;
+	unsigned int* entry_counts = NULL;
+
+	while ((retval = ctf_file_get_next_type(file, type, &type)) == CTF_OK)
+	{
+		ctf_kind kind;
+		ctf_type_get_kind(type, &kind);
+
+		if (kind == CTF_KIND_ENUM)
+		{
+			total_enum_count++;
+			entry_counts = realloc(entry_counts, total_enum_count *
+			    sizeof(unsigned int));
+
+			ctf_enum _enum;
+			ctf_enum_init(type, &_enum);
+
+			ctf_enum_entry enum_entry = NULL;
+			unsigned int entry_count = 0;		
+			while ((retval = ctf_enum_get_next_enum_entry(_enum, enum_entry, 
+			    &enum_entry)) == CTF_OK)
+				entry_count++;
+
+			entry_counts[total_enum_count-1] = entry_count;
+			total_entry_count += entry_count;
+		}
+	}
+
+	printf("-- Enum Stats -----\n");
+	printf("Number of entries: %d\n", total_enum_count);
+	printf("Minimal entry count: %d\n", 
+	    minimum(entry_counts, total_enum_count));
+	printf("Maximal entry count: %d\n", 
+	    maximum(entry_counts, total_enum_count));
+	printf("Average entry count: %f\n",
+	    arithmetic_mean(entry_counts, total_enum_count));
+	printf("Median entry count: %f\n",
+	    median(entry_counts, total_enum_count));
+
+	return CTF_OK;
+}
+
 int
 main (int argc, char* argv[])
 {
@@ -269,7 +298,7 @@ main (int argc, char* argv[])
 
 	struct ctf_file* file;
 	int retval;
-	if ((retval = ctf_read_file(argv[1], &file)) != CTF_OK)
+	if ((retval = ctf_file_read(argv[1], &file)) != CTF_OK)
 	{
 		fprintf(stderr, "ERROR: unable to read the file: %s\n",
 		    ctf_get_error_string(retval));
@@ -281,6 +310,6 @@ main (int argc, char* argv[])
 	print_kind_counts(file);
 	print_struct_stats(file);
 	print_union_stats(file);
-	/* print_enum_stats(); */
+	print_enum_stats(file);
 }
 
