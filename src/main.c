@@ -296,7 +296,7 @@ main (int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	struct ctf_file* file;
+	ctf_file file;
 	int retval;
 	if ((retval = ctf_file_read(argv[1], &file)) != CTF_OK)
 	{
