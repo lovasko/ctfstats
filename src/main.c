@@ -1,4 +1,4 @@
-#include "../lctf/src/libctf.h"
+#include "../../libctf/src/libctf.h"
 
 #include "statistics.h"
 #include "conversion.h"
