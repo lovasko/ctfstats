@@ -6,7 +6,7 @@
 unsigned int 
 minimum (unsigned int values[], unsigned int size)
 {
-	int m = values[0];
+	unsigned int m = values[0];
 
 	for (unsigned int i = 0; i < size; i++)
 		if (values[i] < m)
@@ -18,7 +18,7 @@ minimum (unsigned int values[], unsigned int size)
 unsigned int
 maximum (unsigned int values[], unsigned int size)
 {
-	int m = values[0];
+	unsigned int m = values[0];
 
 	for (unsigned int i = 0; i < size; i++)
 		if (values[i] > m)
@@ -36,11 +36,11 @@ compare (const void* a, const void* b)
 float
 median (unsigned int values[], unsigned int size)
 {
-	int* values_sorted;
-	values_sorted = malloc(sizeof(int) * size);
+	unsigned int* values_sorted;
+	values_sorted = malloc(sizeof(unsigned int) * size);
 	
-	memcpy(values_sorted, values, sizeof(int) * size);
-	qsort(values_sorted, size, sizeof(int), compare);
+	memcpy(values_sorted, values, sizeof(unsigned int) * size);
+	qsort(values_sorted, size, sizeof(unsigned int), compare);
 
 	if (size % 2)
 		return (float)values_sorted[size/2];
@@ -51,7 +51,7 @@ median (unsigned int values[], unsigned int size)
 float
 arithmetic_mean (unsigned int values[], unsigned int size)
 {
-	int sum = 0;
+	unsigned int sum = 0;
 
 	for (unsigned int i = 0; i < size; i++)
 		sum += values[i];
